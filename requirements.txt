@@ -1,0 +1,8 @@
+numpy
+matplotlib
+Pillow
+torch
+torchvision
+plotly
+pandas
+openpyxl
