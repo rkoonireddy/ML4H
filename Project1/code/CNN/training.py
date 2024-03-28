@@ -63,8 +63,8 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, optimizer, n
 
     sum_batches = len(train_dataloader) + len(val_dataloader) + len(test_dataloader)
 
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # use gpu
+    #device = torch.device('cpu')
     #print("Using " + str(torch.cuda.get_device_name(device)))
     model.to(device)
     t1 = time.time()

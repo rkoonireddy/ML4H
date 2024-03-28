@@ -45,11 +45,11 @@ if __name__ == '__main__':
     data_path = 'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/*/*/*.jpeg'
     #  x = np.asarray(range(len(glob(data_path))))
     x = glob(data_path)
-    #x_no_test = [file for file in x if 'test' not in file]
-    #x_test = [file for file in x if 'test' in file]
+    x_no_test = [file for file in x if 'test' not in file]
+    x_test = [file for file in x if 'test' in file]
     pneumonia_list_ids = []
     normal_list_ids = []
-    for filename in x:
+    for filename in x_no_test:
         image_id = get_image_id_from_filename(filename)
         if 'PNEUMONIA' in filename:
             if len(pneumonia_list_ids) == 0 or pneumonia_list_ids[len(pneumonia_list_ids) - 1] != image_id:
@@ -60,13 +60,29 @@ if __name__ == '__main__':
     random.shuffle(pneumonia_list_ids)
     random.shuffle(normal_list_ids)
 
-    train_pneumonia_list_ids = pneumonia_list_ids[:int(0.7*len(pneumonia_list_ids))]
-    validation_pneumonia_list_ids = pneumonia_list_ids[int(0.7 * len(pneumonia_list_ids)):int(0.9 * len(pneumonia_list_ids))]
-    test_pneumonia_list_ids = pneumonia_list_ids[int(0.9 * len(pneumonia_list_ids)):]
+    train_pneumonia_list_ids = pneumonia_list_ids[:int(0.8*len(pneumonia_list_ids))]
+    validation_pneumonia_list_ids = pneumonia_list_ids[int(0.8 * len(pneumonia_list_ids)):]
+  
 
-    train_normal_list_ids = normal_list_ids[:int(0.7 * len(normal_list_ids))]
-    validation_normal_list_ids = normal_list_ids[int(0.7 * len(normal_list_ids)):int(0.9 * len(normal_list_ids))]
-    test_normal_list_ids = normal_list_ids[int(0.9 * len(normal_list_ids)):]
+    train_normal_list_ids = normal_list_ids[:int(0.8 * len(normal_list_ids))]
+    validation_normal_list_ids = normal_list_ids[int(0.8 * len(normal_list_ids)):]
+    
+
+    pneumonia_list_ids = []
+    normal_list_ids = []
+    for filename in x_test:
+        image_id = get_image_id_from_filename(filename)
+        if 'PNEUMONIA' in filename:
+            if len(pneumonia_list_ids) == 0 or pneumonia_list_ids[len(pneumonia_list_ids) - 1] != image_id:
+                pneumonia_list_ids.append(image_id)
+        else:
+            if len(normal_list_ids) == 0 or normal_list_ids[len(normal_list_ids) - 1] != image_id:
+                normal_list_ids.append(image_id)
+    random.shuffle(pneumonia_list_ids)
+    random.shuffle(normal_list_ids)
+
+    test_pneumonia_list_ids = pneumonia_list_ids
+    test_normal_list_ids = normal_list_ids
 
     train_pneumonia_images = []
     validation_pneumonia_images = []
