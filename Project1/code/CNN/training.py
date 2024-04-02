@@ -79,6 +79,8 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, optimizer, n
             output = model(variables)  # prediction based on variables (input)
 
             optimizer.zero_grad()  # in PyTorch we need to set gradients to 0 before propagation backwards
+            #graddd = output.grad
+            #print(output.grad)
             loss = loss_function(output, ys)
             loss.backward()  # we are calculating loss and propagate it backwards --> calculating weight updates
             optimizer.step()  # update params, update weights
@@ -141,16 +143,16 @@ def train(model, train_dataloader, val_dataloader, test_dataloader, optimizer, n
                 variables = variables.to(device)
                 ys = ys.to(device)
                 output = model(variables) # we send input (variables) and get output
-                correct = output.argmax(1)
-                if (ys[0] == 1 and 0 in ys) or (ys[0] == 0 and 1 in ys):
-                    print('Warning...')
-                votes_yes = torch.sum(correct)
-                votes_no = len(correct) - votes_yes
-                conf_mat[0][0] += (1 if votes_yes > votes_no and ys[0] == 1 else 0)
-                conf_mat[0][1] += (1 if votes_yes > votes_no and ys[0] == 0 else 0)
-                conf_mat[1][0] += (1 if votes_yes < votes_no and ys[0] == 1 else 0)
-                conf_mat[1][1] += (1 if votes_yes < votes_no and ys[0] == 0 else 0)
-                if batch % 100 == 0:
+                
+                correct = output.argmax(1) == ys
+                positive = ys == 1
+                negative = ys == 0
+                incorrect = output.argmax(1) != ys
+                conf_mat[0][0] += torch.sum(correct * positive).item()
+                conf_mat[0][1] += torch.sum(incorrect * negative).item()
+                conf_mat[1][0] += torch.sum(incorrect * positive).item()
+                conf_mat[1][1] += torch.sum(correct * negative).item()
+                if batch % 10 == 0:
                     display_time(t1, batch + len(train_dataloader) + len(val_dataloader), sum_batches, epoch, n_epochs,
                                  torch.sum(correct).item(), len(variables), losses[-1])
 

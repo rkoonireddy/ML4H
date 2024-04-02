@@ -37,9 +37,9 @@ if __name__ == '__main__':
     os.mkdir(save_path)
     param = Parameters()
     param.save(save_path, 'Parameters')
-    net2d = resnet18(weights="DEFAULT")
-    net2d.fc = torch.nn.Linear(512, 2)
-    #  net2d.load_state_dict(torch.load('./results/Run_20240329_155858/model_6.pth'))
+    net = resnet18(weights="DEFAULT")
+    net.fc = torch.nn.Linear(512, 2)
+    #  net2d.load_state_dict(torch.load('./results/Run_20240329_155858/model_15.pth'))
     random.seed(111)
 
     data_path = 'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/*/*/*.jpeg'
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     normal_list_ids = []
     for filename in x_no_test:
         image_id = get_image_id_from_filename(filename)
-        if 'PNEUMONIA' in filename:
+        if 'PNEUMONIA' in filename and len(pneumonia_list_ids) < 1350:
             if len(pneumonia_list_ids) == 0 or pneumonia_list_ids[len(pneumonia_list_ids) - 1] != image_id:
                 pneumonia_list_ids.append(image_id)
         else:
@@ -110,12 +110,13 @@ if __name__ == '__main__':
             if img_id in test_normal_list_ids:
                 test_normal_images.append(filename)
 
-    # ad, cn = count_classes(x[:train_proc])
+    # pneumonia, normal = count_classes(x[:train_proc])
     print('Training - {} pneumonia and {} normal'.format(len(train_pneumonia_images), len(train_normal_images)))
-    # ad, cn = count_classes(x[train_proc:(train_proc + val_proc)])
+    # pneumonia, normal = count_classes(x[train_proc:(train_proc + val_proc)])
     print('Validation - {} pneumonia and {} normal'.format(len(validation_pneumonia_images), len(validation_normal_images)))
-    # ad, cn = count_classes(x[(train_proc + val_proc):])
+    # pneumonia, normal = count_classes(x[(train_proc + val_proc):])
     print('Test - {} pneumonia and {} normal'.format(len(test_pneumonia_images), len(test_normal_images)))
+
 
     training_list = train_pneumonia_images + train_normal_images
     validation_list = validation_pneumonia_images + validation_normal_images
@@ -144,15 +145,15 @@ if __name__ == '__main__':
     optimizer = None
     if param.optim_fcn == 'adam':
         optimizer = torch.optim.Adam([
-            {'params': net2d.parameters()}
+            {'params': net.parameters()}
         ], lr=param.learning_rate, weight_decay=param.weight_decay)
     elif param.optim_fcn == 'sgd':
         optimizer = torch.optim.SGD([
-            {'params': net2d.parameters()}
+            {'params': net.parameters()}
         ], lr=param.learning_rate, weight_decay=param.weight_decay, momentum=0.9)
     elif param.optim_fcn == 'adagrad':
         optimizer = torch.optim.Adagrad([
-            {'params': net2d.parameters()}
+            {'params': net.parameters()}
         ], lr=param.learning_rate, weight_decay=param.weight_decay)
     else:
         print('Wrong optim function!')
@@ -169,6 +170,6 @@ if __name__ == '__main__':
         print('Wrong loss function!')
         sys.exit()
 
-    train(net2d, dataloader_train, dataloader_validation, dataloader_test, optimizer, param.num_of_epochs,
+    train(net, dataloader_train, dataloader_validation, dataloader_test, optimizer, param.num_of_epochs,
           loss_function, scheduler,
           save_path)

@@ -4,11 +4,12 @@ import pandas as pd
 class Parameters:
     def __init__(self):
         # Number of epochs used for training
-        self.num_of_epochs = 20
+        self.num_of_epochs = 15
         # Batch size used
         self.batch_size = 64
         # Start value for learning rate
-        self.learning_rate = 0.001
+        # 0.001 lr is too big - not good results!
+        self.learning_rate = 0.0005
         # Learning rate scheduler parameters
         self.scheduler_step_size = 5
         self.scheduler_gama = 0.33
@@ -38,11 +39,6 @@ class Parameters:
         self.weight_decay = 0.0005
         # Images normalized
         self.images_normalized = True
-        # For 2D scan first image slice which is taken from 3d scan
-        self.first_slice_coronal = 1
-        self.first_slice_sagittal = 1
-        self.first_slice_axial = 1
-
         # Dataset split
         self.training_dataset = 0.7
         self.validation_dataset = 0.2
@@ -62,9 +58,6 @@ class Parameters:
             'LossFcn': self.loss_fcn,
             'WeightDecay': self.weight_decay,
             'ImagesNormalized': self.images_normalized,
-            'FirstSliceCoronal': self.first_slice_coronal,
-            'FirstSliceSagittal': self.first_slice_sagittal,
-            'FirstSliceAxial': self.first_slice_axial,
             'TrainingDatasetSize': self.training_dataset,
             'ValidationDatasetSize': self.validation_dataset,
             'TestDatasetSize': [self.test_dataset],
