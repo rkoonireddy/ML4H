@@ -58,7 +58,6 @@ class Parameters:
             'LossFcn': self.loss_fcn,
             'WeightDecay': self.weight_decay,
             'ImagesNormalized': self.images_normalized,
-
             'TrainingDatasetSize': self.training_dataset,
             'ValidationDatasetSize': self.validation_dataset,
             'TestDatasetSize': [self.test_dataset],

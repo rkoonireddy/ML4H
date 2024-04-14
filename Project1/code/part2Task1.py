@@ -1,8 +1,6 @@
 import os
 from matplotlib import pyplot as plt
 from matplotlib import image as mpimg
-from PIL import Image
-import numpy as np
 
 # path to dataset
 current_dir = os.getcwd()
@@ -109,7 +107,7 @@ def plot_image_examples():
     plt.show()
 
 
-#explore_label_distribution(dataset_path)
-#plot_image_examples()
+explore_label_distribution(dataset_path)
+plot_image_examples()
 
 

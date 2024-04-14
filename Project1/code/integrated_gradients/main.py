@@ -1,23 +1,13 @@
-import os
 import random
-import sys
-import time
-from glob import glob
-
 import cv2
 import numpy as np
 import torch
-from torch.optim import lr_scheduler
-from torch.utils.data import DataLoader
-from torchvision import transforms
 from torchvision.models import resnet18
-
-from dataset import PneumoniaDataset
 from parameters import Parameters
-import plotly.express as px
 import matplotlib.pyplot as plt
 from integrated_gradients import random_baseline_integrated_gradients
 from visualization import visualize
+from torchvision import transforms
 
 
 def scale_pic(pic):
@@ -29,16 +19,23 @@ def get_image_id_from_filename(image_name_string: str) -> str:
     image_id = full_image_id.split('.') 
     return image_id[0]
 
-class GammaTransform:
-    """Rotate by one of the given angles."""
+def get_image_id_from_filename2(image_name_string: str) -> str:
+    substrings = image_name_string.split('/')
+    full_image_id = substrings[len(substrings) - 1] 
+    image_id = full_image_id.split('.') 
+    return image_id[0]
 
-    def __init__(self, gamma_min, gamma_max):
-        self.gamma_range = [gamma_min, gamma_max]
+def normalize(img):
+    transform_norm = transforms.Compose([
+        transforms.Normalize(mean=[122.7862, 122.7862, 122.7862], std=[60.2265, 60.2265, 60.2265])
+    ])
+    return transform_norm(img)
 
-    def __call__(self, input_image):
-        return transforms.functional.adjust_gamma(input_image,
-                                                  gamma=random.uniform(self.gamma_range[0],
-                                                                       self.gamma_range[1]))
+def resize(img):
+    transform_resize = transforms.Compose([
+        transforms.Resize((224, 224), antialias=True)
+    ])
+    return transform_resize(img)
 
 if __name__ == '__main__':
     # load cnn
@@ -49,106 +46,140 @@ if __name__ == '__main__':
     
     # 5 healthy and 5 disease samples
     image_paths = []
-    healthy_1 = 'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0007-0001.jpeg'
-    healthy_2 = 'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0041-0001.jpeg'
-    image_paths.append(healthy_1)
-    image_paths.append(healthy_2)
-  
+    """
+    healthy_images_paths = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0071-0001.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0297-0001.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0041-0001.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0357-0001.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0378-0001.jpeg']
+    disease_images_paths = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person80_bacteria_391.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person83_bacteria_407.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person3_virus_17.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person101_bacteria_483.jpeg',
+                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person174_bacteria_832.jpeg']
+    """
+    healthy_images_paths = []
+    disease_images_paths = []  
+    show_mark = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person108_bacteria_507.jpeg']        
     
-    permanent_trans = transforms.Compose([
-            transforms.Resize((224, 224), antialias=True)
-    ])
-   
-    only_train_trans = transforms.RandomApply([
-        transforms.RandomAffine(degrees=10, translate=(0.02, 0.02), scale=(0.95, 1.05)),
-        transforms.GaussianBlur(kernel_size=(7, 7), sigma=(0.1, 0.2)),
-        transforms.RandomHorizontalFlip(0.5),
-        transforms.RandomVerticalFlip(0.5),
-        transforms.RandomAdjustSharpness(0.2)
-        ], p=0.7)
-  
-    dataset = PneumoniaDataset(image_paths, permanent_trans, only_train_trans, reflection=True)
-    dataloader = DataLoader(dataset, batch_size=param.batch_size, shuffle=True, num_workers=4)
-
-    optimizer = None
-    if param.optim_fcn == 'adam':
-        optimizer = torch.optim.Adam([
-            {'params': net.parameters()}
-        ], lr=param.learning_rate, weight_decay=param.weight_decay)
-    elif param.optim_fcn == 'sgd':
-        optimizer = torch.optim.SGD([
-            {'params': net.parameters()}
-        ], lr=param.learning_rate, weight_decay=param.weight_decay, momentum=0.9)
-    elif param.optim_fcn == 'adagrad':
-        optimizer = torch.optim.Adagrad([
-            {'params': net.parameters()}
-        ], lr=param.learning_rate, weight_decay=param.weight_decay)
-    else:
-        print('Wrong optim function!')
-        sys.exit()
-
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=param.scheduler_step_size, gamma=param.scheduler_gama)
-
-    loss_function = None
-    if param.loss_fcn == 'cross_entropy':
-        loss_function = torch.nn.CrossEntropyLoss()
-    elif param.loss_fcn == 'mse':
-        loss_function = torch.nn.MSELoss()
-    else:
-        print('Wrong loss function!')
-        sys.exit()
+    for image_path in healthy_images_paths:
+        image_paths.append(image_path)
+    for image_path in disease_images_paths:
+        image_paths.append(image_path)
+    for image_path in show_mark:
+        image_paths.append(image_path)
 
     #print(len(image_paths))
     images_ok = []
+    images_names = []
+    images_original = []
     for i in image_paths:
         img = cv2.imread(i)
-        img = cv2.resize(img,(224,224))
         img = img.astype(np.double)
         img = img.transpose(2,0,1)
         img = torch.from_numpy(img)
+        img = img / 255.0
+        images_original.append(img)
+
+        ######## crop the image ########## 
+        image_width = img.shape[1]
+        image_height = img.shape[2]
+        crop_transform = transforms.CenterCrop((int(image_width*0.75), int(image_height*0.75)))
+        img = crop_transform(img)
+
+        img = resize(img)
+        #img = normalize(img)   
         images_ok.append(img)
+        images_names.append(get_image_id_from_filename2(i))
     net = resnet18(weights="DEFAULT")
     net.fc = torch.nn.Linear(512, 2)
-    net.load_state_dict(torch.load('./Project1/code/integrated_gradients/best_model.pth', map_location=torch.device('cuda')))
+    net.load_state_dict(torch.load('./Project1/code/integrated_gradients/our_model.pth', map_location=torch.device('cuda')))
 
-    attributions = random_baseline_integrated_gradients([images_ok[1]], net, steps=300, num_random_trials=2)
-    img_integrated_gradient_overlay = visualize(attributions, images_ok[1], clip_above_percentile=99, clip_below_percentile=0,
+    images_integrated_gradient_overlay = []
+    images_integrated_gradient = []
+    
+    # plot
+    if len(images_ok) > 1:
+        fig, axes = plt.subplots(len(images_ok), 4, figsize=(20, 35))
+        for cnt, img in enumerate(images_ok):
+            
+            attributions = random_baseline_integrated_gradients([img], net, steps=250, num_random_trials=15)
+            img_integrated_gradient_overlay = visualize(attributions, img, clip_above_percentile=99, clip_below_percentile=0,
                                                 overlay=True, mask_mode=True)
-    img_integrated_gradient = visualize(attributions, images_ok[1], clip_above_percentile=99, clip_below_percentile=0, overlay=False)
-    """
-    fig = px.imshow(images_ok[0].numpy().transpose(1, 2, 0))
-    fig.show()
-    fig2 = px.imshow(img_integrated_gradient_overlay.transpose(0, 1, 2))
-    fig2.show()
-    fig3 = px.imshow(img_integrated_gradient.transpose(0, 1, 2))
-    fig3.show()
-    """
+            #images_integrated_gradient_overlay.append(img_integrated_gradient_overlay)
+            img_integrated_gradient = visualize(attributions, img, clip_above_percentile=99, clip_below_percentile=0, overlay=False)
+            #images_integrated_gradient.append(img_integrated_gradient)
 
-    # Plotting the original image
-    plt.figure(figsize=(15, 5))
-    plt.subplot(1, 3, 1)
-    plt.imshow(scale_pic(images_ok[1].numpy().transpose(1, 2, 0)))
-    plt.title('Original Image')
-    plt.axis('off')
+            title = "Original - " + str(images_names[cnt])
+            axes[cnt, 0].set_title(title)
+            axes[cnt, 0].set_xlabel("Width [pixels]")
+            axes[cnt, 0].set_ylabel("Height [pixels]")
+            axes[cnt, 0].imshow(images_original[cnt].permute(1, 2, 0).numpy(), cmap='gray')
+        
+            title = "Cropped and resized - " + str(images_names[cnt])
+            axes[cnt,1].set_title(title)
+            axes[cnt,1].set_xlabel("Width [pixels]")
+            axes[cnt,1].set_ylabel("Height [pixels]")
+            axes[cnt,1].imshow(img.permute(1, 2, 0), cmap='gray')
+    
+            title = "Integrated gradient overlay - " + str(images_names[cnt])
+            axes[cnt, 2].set_title(title)
+            axes[cnt, 2].set_xlabel("Width [pixels]")
+            axes[cnt, 2].set_ylabel("Height [pixels]")
+            axes[cnt, 2].imshow(img_integrated_gradient_overlay.transpose(0, 1, 2), cmap='gray')
 
-    # Plotting the image with integrated gradient overlay
-    plt.subplot(1, 3, 2)
-    plt.imshow(scale_pic(img_integrated_gradient_overlay.transpose(0, 1, 2)))
-    plt.title('Integrated Gradient Overlay')
-    plt.axis('off')
+            title = "Integrated gradient - " + str(images_names[cnt])
+            axes[cnt, 3].set_title(title)
+            axes[cnt, 3].set_xlabel("Width [pixels]")
+            axes[cnt, 3].set_ylabel("Height [pixels]")
+            img_integrated_gradient = img_integrated_gradient / np.max(img_integrated_gradient)
+            axes[cnt, 3].imshow(img_integrated_gradient.transpose(0, 1, 2), cmap='gray')
+    
+        plt.show()
+        plt.close()
+    
+    else:
+        fig, axes = plt.subplots(1, 4, figsize=(20, 35))
+        for cnt, img in enumerate(images_ok):
+            
+            attributions = random_baseline_integrated_gradients([img], net, steps=250, num_random_trials=15)
+            img_integrated_gradient_overlay = visualize(attributions, img, clip_above_percentile=99, clip_below_percentile=0,
+                                                overlay=True, mask_mode=True)
+            #images_integrated_gradient_overlay.append(img_integrated_gradient_overlay)
+            img_integrated_gradient = visualize(attributions, img, clip_above_percentile=99, clip_below_percentile=0, overlay=False)
+            #images_integrated_gradient.append(img_integrated_gradient)
 
-    # Plotting the image with integrated gradient
-    plt.subplot(1, 3, 3)
-    plt.imshow(scale_pic(img_integrated_gradient.transpose(0, 1, 2)))
-    plt.title('Integrated Gradient')
-    plt.axis('off')
+            title = "Original - " + str(images_names[cnt])
+            axes[0].set_title(title)
+            axes[0].set_xlabel("Width [pixels]")
+            axes[0].set_ylabel("Height [pixels]")
+            axes[0].imshow(images_original[cnt].permute(1, 2, 0).numpy(), cmap='gray')
+        
+            title = "Cropped and resized - " + str(images_names[cnt])
+            axes[1].set_title(title)
+            axes[1].set_xlabel("Width [pixels]")
+            axes[1].set_ylabel("Height [pixels]")
+            axes[1].imshow(img.permute(1, 2, 0), cmap='gray')
+    
+            title = "Integrated gradient overlay - " + str(images_names[cnt])
+            axes[2].set_title(title)
+            axes[2].set_xlabel("Width [pixels]")
+            axes[2].set_ylabel("Height [pixels]")
+            axes[2].imshow(img_integrated_gradient_overlay.transpose(0, 1, 2), cmap='gray')
 
-    plt.show()
+            title = "Integrated gradient - " + str(images_names[cnt])
+            axes[3].set_title(title)
+            axes[3].set_xlabel("Width [pixels]")
+            axes[3].set_ylabel("Height [pixels]")
+            img_integrated_gradient = img_integrated_gradient / np.max(img_integrated_gradient)
+            axes[3].imshow(img_integrated_gradient.transpose(0, 1, 2), cmap='gray')
+    
+        plt.show()
+        plt.close()
 
 
     # waits for user to press any key
     # (this is necessary to avoid Python kernel form crashing)
     cv2.waitKey(0)
-
     # closing all open windows
     cv2.destroyAllWindows()

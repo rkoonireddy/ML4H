@@ -9,7 +9,7 @@ class Parameters:
         self.batch_size = 64
         # Start value for learning rate
         # 0.001 lr is too big - not good results!
-        self.learning_rate = 0.0005
+        self.learning_rate = 0.00001
         # Learning rate scheduler parameters
         self.scheduler_step_size = 5
         self.scheduler_gama = 0.33

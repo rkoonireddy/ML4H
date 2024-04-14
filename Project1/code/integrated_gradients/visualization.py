@@ -70,4 +70,5 @@ def visualize(attributions, image, positive_channel=G, negative_channel=R, polar
             image = np.array(image).transpose(1, 2, 0)
             attributions = np.clip(attributions * image, 0, 255)
             attributions = attributions[:, :, (2, 1, 0)]
+
     return attributions

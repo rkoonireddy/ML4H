@@ -5,4 +5,8 @@ torch
 torchvision
 plotly
 pandas
+opencv-python
 openpyxl
+
+random
+glob

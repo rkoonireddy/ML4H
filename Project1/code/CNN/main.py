@@ -62,12 +62,9 @@ if __name__ == '__main__':
 
     train_pneumonia_list_ids = pneumonia_list_ids[:int(0.8*len(pneumonia_list_ids))]
     validation_pneumonia_list_ids = pneumonia_list_ids[int(0.8 * len(pneumonia_list_ids)):]
-  
-
     train_normal_list_ids = normal_list_ids[:int(0.8 * len(normal_list_ids))]
     validation_normal_list_ids = normal_list_ids[int(0.8 * len(normal_list_ids)):]
     
-
     pneumonia_list_ids = []
     normal_list_ids = []
     for filename in x_test:
@@ -117,12 +114,10 @@ if __name__ == '__main__':
     # pneumonia, normal = count_classes(x[(train_proc + val_proc):])
     print('Test - {} pneumonia and {} normal'.format(len(test_pneumonia_images), len(test_normal_images)))
 
-
     training_list = train_pneumonia_images + train_normal_images
     validation_list = validation_pneumonia_images + validation_normal_images
     test_list = test_pneumonia_images + test_normal_images
    
-    
     permanent_trans = transforms.Compose([
             transforms.Resize((224, 224), antialias=True)
     ])
