@@ -94,7 +94,7 @@ if __name__ == '__main__':
         images_names.append(get_image_id_from_filename2(i))
     net = resnet18(weights="DEFAULT")
     net.fc = torch.nn.Linear(512, 2)
-    net.load_state_dict(torch.load('../Project1/code/integrated_gradients/our_model.pth', map_location=torch.device('cuda')))
+    net.load_state_dict(torch.load('../Project1/code/integrated_gradients/our_model_70p_random.pth', map_location=torch.device('cuda')))
 
     images_integrated_gradient_overlay = []
     images_integrated_gradient = []

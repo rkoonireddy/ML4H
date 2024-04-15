@@ -4,6 +4,8 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 import cv2
+import pandas as pd
+import random
 
 
 def get_image_id_from_filename(image_name_string: str) -> str:
@@ -13,11 +15,28 @@ def get_image_id_from_filename(image_name_string: str) -> str:
     return image_id[0]
 
 class PneumoniaDataset(Dataset):
-    def __init__(self, data, transform, train_transform=None, reflection=False):
+    def __init__(self, data, transform, train_transform=None, reflection=False, randomize_labels=False, randomization_percentage=0.5):
         self.data = np.asarray(data)
         self.resize = transform
         self.train_transform = train_transform
         self.reflection = reflection
+        self.randomize_labels = randomize_labels
+        self.randomization_percentage = randomization_percentage
+
+    def save_to_excel(self, path, name):
+        # Create a dictionary with attribute names and corresponding data
+        data_dict = {
+            'TrainTransform': [self.train_transform],
+            'Reflection': [self.reflection],
+            'RandomizeLabels': [self.randomize_labels],
+            'RandomizationPercentage': [self.randomization_percentage]
+        }
+
+        # Create a DataFrame from the dictionary
+        to_file = pd.DataFrame(data_dict)
+
+        # Save the DataFrame to an Excel file
+        to_file.to_excel(f'{path}/{name}.xlsx', index=False)
 
     def normalize(self, img):
         transform_norm = transforms.Compose([
@@ -102,7 +121,17 @@ class PneumoniaDataset(Dataset):
 
         if torch.isnan(img_final).any():
             print('Image has nan')
-        target = int((1 if 'PNEUMONIA' in file else 0))
+
+         # Randomize labels if enabled
+        if self.randomize_labels:
+            # Check randomization percentage for labels
+            if random.random() < self.randomization_percentage:
+                target = random.randint(0, 1)  # Randomly assign a label (0 or 1)
+            else:
+                target = int((1 if 'PNEUMONIA' in file else 0))
+        else:
+            target = int((1 if 'PNEUMONIA' in file else 0))
+        
         return img_final, target
 
     def __len__(self):
