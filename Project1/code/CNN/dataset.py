@@ -36,7 +36,7 @@ class PneumoniaDataset(Dataset):
         img = img.astype(np.float32) 
         img = img.transpose(2, 1, 0) 
         img = torch.from_numpy(img)
-        img = img / 255.0
+        #img = img / 255.0
         
         ######## crop the image ##########
        
@@ -44,10 +44,10 @@ class PneumoniaDataset(Dataset):
         image_width = img.shape[1]
         image_height = img.shape[2]
         crop_transform = transforms.CenterCrop((int(image_width*0.75), int(image_height*0.75)))
-        img_cropped = crop_transform(img)
+        img = crop_transform(img)
 
         ######## resize the image ########
-        image_resized = self.resize(img_cropped)
+        image_resized = self.resize(img)
        
         ######## apply transformations #########
         image_transformed = image_resized
@@ -93,7 +93,7 @@ class PneumoniaDataset(Dataset):
         ######### normalize the image ########
         #img = np.transpose(img, (1, 2, 0))
         #mean, std = img.mean([0,1,2]), img.std([0,1,2])
-        #image_transformed = self.normalize(image_transformed)
+        image_transformed = self.normalize(image_transformed)
         noise = torch.zeros(3, 224, 224, dtype=torch.float)
         noise = noise + (0.001 ** 0.5) * torch.randn(3, 224, 224)
         img_final = image_transformed + noise
