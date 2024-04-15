@@ -21,6 +21,18 @@ def get_grads(inputs, model):
 
 # integrated gradients
 def integrated_gradients(inputs, model, baseline=None, steps=50):
+    """
+    Computes Integrated Gradients for a given input with respect to a model.
+
+    Parameters:
+        inputs (array-like): The input for which integrated gradients are computed.
+        model (torch.nn.Module): The neural network model for which gradients are computed.
+        baseline (array-like, optional): The baseline input to compare against. Defaults to None.
+        steps (int, optional): The number of steps for approximating the integral. Defaults to 50.
+
+    Returns:
+        integrated_grad (array-like): The integrated gradients computed for the input.
+    """
     inputs = torch.as_tensor(inputs, dtype=torch.float32)
     if baseline is None:
         baseline = 0 * inputs 
@@ -38,6 +50,18 @@ def integrated_gradients(inputs, model, baseline=None, steps=50):
     return integrated_grad
 
 def random_baseline_integrated_gradients(inputs, model, steps, num_random_trials):
+    """
+    Computes Integrated Gradients with random baselines for a given input and model.
+
+    Parameters:
+        inputs (array-like): The input for which integrated gradients are computed.
+        model (torch.nn.Module): The neural network model for which gradients are computed.
+        steps (int): The number of steps for approximating the integral.
+        num_random_trials (int): The number of random baseline trials to perform.
+
+    Returns:
+        avg_intgrads (array-like): The average integrated gradients computed over all trials.
+    """
     inputs = np.asarray(inputs)
     all_intgrads = []
     for i in range(num_random_trials):

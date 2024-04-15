@@ -1,4 +1,5 @@
 import random
+import os
 import cv2
 import numpy as np
 import torch
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     """
     healthy_images_paths = []
     disease_images_paths = []  
-    show_mark = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person108_bacteria_507.jpeg']        
+    show_mark = ['../Project1/data/chest_xray/test/PNEUMONIA/person108_bacteria_507.jpeg']
     
     for image_path in healthy_images_paths:
         image_paths.append(image_path)
@@ -93,7 +94,7 @@ if __name__ == '__main__':
         images_names.append(get_image_id_from_filename2(i))
     net = resnet18(weights="DEFAULT")
     net.fc = torch.nn.Linear(512, 2)
-    net.load_state_dict(torch.load('./Project1/code/integrated_gradients/our_model.pth', map_location=torch.device('cuda')))
+    net.load_state_dict(torch.load('../Project1/code/integrated_gradients/our_model.pth', map_location=torch.device('cuda')))
 
     images_integrated_gradient_overlay = []
     images_integrated_gradient = []
