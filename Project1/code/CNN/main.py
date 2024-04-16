@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #  net2d.load_state_dict(torch.load('./results/Run_20240329_155858/model_15.pth'))
     random.seed(111)
 
-    data_path = '../Project1/data/chest_xray/*/*/*.jpeg'
+    data_path = './Project1/data/chest_xray/*/*/*.jpeg'
     #  x = np.asarray(range(len(glob(data_path))))
     x = glob(data_path)
     x_no_test = [file for file in x if 'test' not in file]
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         ], p=0.7)
     
     #chage randomization_label flag and percentage
-    dataset_train = PneumoniaDataset(training_list, permanent_trans, only_train_trans, reflection=True,randomize_labels=True,randomization_percentage=0.7) 
+    dataset_train = PneumoniaDataset(training_list, permanent_trans, only_train_trans, reflection=False,randomize_labels=False,randomization_percentage=0.7) 
     dataset_train.save_to_excel(save_path, 'dataset_parameters')
     dataloader_train = DataLoader(dataset_train, batch_size=param.batch_size, shuffle=True, num_workers=4)
     dataset_validation = PneumoniaDataset(validation_list, permanent_trans)

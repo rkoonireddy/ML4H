@@ -48,20 +48,25 @@ if __name__ == '__main__':
     # 5 healthy and 5 disease samples
     image_paths = []
     """
-    healthy_images_paths = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0071-0001.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0297-0001.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/IM-0041-0001.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0357-0001.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0378-0001.jpeg']
-    disease_images_paths = ['C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person80_bacteria_391.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person83_bacteria_407.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person3_virus_17.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person101_bacteria_483.jpeg',
-                            'C:/Users/teodo/Desktop/repos/ML4H/Project1/data/chest_xray/test/PNEUMONIA/person174_bacteria_832.jpeg']
+    healthy_images_paths = ['./Project1/data/chest_xray/test/NORMAL/IM-0071-0001.jpeg',
+                            './Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0297-0001.jpeg',
+                            './Project1/data/chest_xray/test/NORMAL/IM-0041-0001.jpeg',
+                            './Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0357-0001.jpeg',
+                            './Project1/data/chest_xray/test/NORMAL/NORMAL2-IM-0378-0001.jpeg']
+    disease_images_paths = ['./Project1/data/chest_xray/test/PNEUMONIA/person80_bacteria_391.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person83_bacteria_407.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person3_virus_17.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person101_bacteria_483.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person174_bacteria_832.jpeg']
+    show_mark = ['./Project1/data/chest_xray/test/PNEUMONIA/person108_bacteria_507.jpeg']
     """
     healthy_images_paths = []
-    disease_images_paths = []  
-    show_mark = ['../Project1/data/chest_xray/test/PNEUMONIA/person108_bacteria_507.jpeg']
+    disease_images_paths = ['./Project1/data/chest_xray/test/PNEUMONIA/person80_bacteria_391.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person83_bacteria_407.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person3_virus_17.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person101_bacteria_483.jpeg',
+                            './Project1/data/chest_xray/test/PNEUMONIA/person174_bacteria_832.jpeg']  
+    show_mark = []
     
     for image_path in healthy_images_paths:
         image_paths.append(image_path)
@@ -94,7 +99,7 @@ if __name__ == '__main__':
         images_names.append(get_image_id_from_filename2(i))
     net = resnet18(weights="DEFAULT")
     net.fc = torch.nn.Linear(512, 2)
-    net.load_state_dict(torch.load('../Project1/code/integrated_gradients/our_model_70p_random.pth', map_location=torch.device('cuda')))
+    net.load_state_dict(torch.load('./Project1/code/integrated_gradients/our_model.pth', map_location=torch.device('cuda')))
 
     images_integrated_gradient_overlay = []
     images_integrated_gradient = []
@@ -117,13 +122,13 @@ if __name__ == '__main__':
             axes[cnt, 0].set_ylabel("Height [pixels]")
             axes[cnt, 0].imshow(images_original[cnt].permute(1, 2, 0).numpy(), cmap='gray')
         
-            title = "Cropped and resized - " + str(images_names[cnt])
+            title = "Preprocessed - " + str(images_names[cnt])
             axes[cnt,1].set_title(title)
             axes[cnt,1].set_xlabel("Width [pixels]")
             axes[cnt,1].set_ylabel("Height [pixels]")
             axes[cnt,1].imshow(img.permute(1, 2, 0), cmap='gray')
     
-            title = "Integrated gradient overlay - " + str(images_names[cnt])
+            title = "Overlay - " + str(images_names[cnt])
             axes[cnt, 2].set_title(title)
             axes[cnt, 2].set_xlabel("Width [pixels]")
             axes[cnt, 2].set_ylabel("Height [pixels]")
@@ -156,13 +161,13 @@ if __name__ == '__main__':
             axes[0].set_ylabel("Height [pixels]")
             axes[0].imshow(images_original[cnt].permute(1, 2, 0).numpy(), cmap='gray')
         
-            title = "Cropped and resized - " + str(images_names[cnt])
+            title = "Preprocessed - " + str(images_names[cnt])
             axes[1].set_title(title)
             axes[1].set_xlabel("Width [pixels]")
             axes[1].set_ylabel("Height [pixels]")
             axes[1].imshow(img.permute(1, 2, 0), cmap='gray')
     
-            title = "Integrated gradient overlay - " + str(images_names[cnt])
+            title = "Overlay - " + str(images_names[cnt])
             axes[2].set_title(title)
             axes[2].set_xlabel("Width [pixels]")
             axes[2].set_ylabel("Height [pixels]")
